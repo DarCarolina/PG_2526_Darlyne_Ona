@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Maestro - Grúa Torre</title>
+    <style>
+        :root {
+            --yellow: #ffcc00;
+            --dark: #1a1a1a;
+            --gray: #333333;
+            --danger: #ff4444;
+            --accent: #ffaa00;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            /* Patrón de fondo industrial */
+            background-image: 
+                linear-gradient(rgba(26, 26, 26, 0.85), rgba(26, 26, 26, 0.85)),
+                repeating-linear-gradient(45deg, #222 0, #222 2px, transparent 0, transparent 50%);
+            background-size: cover, 20px 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(40, 40, 40, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-top: 5px solid var(--yellow);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--yellow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-bar {
+            background: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 2rem;
+            display: inline-block;
+            border: 1px solid #444;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #444;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-dot.online { background-color: #00ff00; box-shadow: 0 0 10px #00ff00; }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: var(--gray);
+            border: none;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+            box-shadow: 0 4px 0 #000;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .btn.primary { background: var(--yellow); color: var(--dark); }
+        .btn.secondary { background: var(--accent); color: var(--dark); }
+        .btn.stop { 
+            background: var(--danger); 
+            grid-column: span 3; 
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .btn svg { width: 30px; height: 30px; }
+
+        .label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+
+        /* Iconos Simples */
+        .icon { fill: currentColor; }
+
+        /* Estética de advertencia */
+        .warning-stripes {
+            height: 10px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--yellow),
+                var(--yellow) 10px,
+                #000 10px,
+                #000 20px
+            );
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 15px 15px 0 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="warning-stripes"></div>
+        <h1>🏗️ CONTROL DE GRÚA</h1>
+        
+        <div class="status-bar">
+            <span id="status-dot" class="status-dot"></span>
+            <span id="status-text">DESCONECTADO</span>
+        </div>
+
+        <div class="control-grid">
+            <!-- Fila 1: Elevación -->
+            <div></div>
+            <button class="btn secondary" onmousedown="sendCommand('U')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>
+                <span class="label">SUBIR</span>
+            </button>
+            <div></div>
+
+            <!-- Fila 2: Giro y Carro -->
+            <button class="btn primary" onmousedown="sendCommand('L')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                <span class="label">IZQ</span>
+            </button>
+            <button class="btn primary" onmousedown="sendCommand('F')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M12 8l-6 6h12l-6-6z"/></svg>
+                <span class="label">CARRO F</span>
+            </button>
+            <button class="btn primary" onmousedown="sendCommand('R')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                <span class="label">DER</span>
+            </button>
+
+            <!-- Fila 3: Carro B y Elevación D -->
+            <div></div>
+            <button class="btn primary" onmousedown="sendCommand('B')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M12 16l6-6H6l6 6z"/></svg>
+                <span class="label">CARRO B</span>
+            </button>
+            <div></div>
+
+            <!-- Fila 4: Bajar -->
+            <div></div>
+            <button class="btn secondary" onmousedown="sendCommand('D')" onmouseup="sendCommand('S')">
+                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                <span class="label">BAJAR</span>
+            </button>
+            <div></div>
+
+            <!-- STOP -->
+            <button class="btn stop" onclick="sendCommand('S')">
+                PARADA DE EMERGENCIA (STOP)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        function sendCommand(cmd) {
+            console.log("Comando enviado:", cmd);
+            
+            // Reemplazar con la IP de tu ESP32 si no se sirve desde ahí
+            const ip = window.location.hostname || "192.168.4.1"; 
+            
+            fetch(`http://${ip}/control?cmd=${cmd}`)
+                .then(response => {
+                    if(response.ok) {
+                        statusDot.className = "status-dot online";
+                        statusText.innerText = "SISTEMA ACTIVO";
+                    }
+                })
+                .catch(err => {
+                    console.error("Error de conexión:", err);
+                    statusDot.className = "status-dot";
+                    statusText.innerText = "ERROR DE ENLACE";
+                });
+        }
+
+        // Inicialización
+        window.onload = () => {
+            statusText.innerText = "LISTO PARA OPERAR";
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Control de Grúa Torre
+  description: |
+    Especificación de la interfaz de control para una grúa torre operada por un ESP32 y un Arduino Nano.
+    Incluye endpoints web para el control remoto y la definición del protocolo UART.
+  version: 1.0.0
+servers:
+  - url: http://192.168.4.1
+    description: IP por defecto del ESP32 en modo Access Point
+paths:
+  /control:
+    get:
+      summary: Enviar comando de movimiento a la grúa
+      description: Recibe una dirección y envía el carácter correspondiente por UART al Arduino Nano.
+      parameters:
+        - name: cmd
+          in: query
+          required: true
+          description: Carácter de comando a ejecutar.
+          schema:
+            type: string
+            enum: [F, B, L, R, U, D, S]
+            example: F
+      responses:
+        '200':
+          description: Comando enviado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "Comando F enviado"
+        '400':
+          description: Comando no válido
+
+components:
+  schemas:
+    UARTProtocol:
+      type: object
+      description: Protocolo de mensajería UART entre ESP32 (TX) y Arduino Nano (RX).
+      properties:
+        baudrate:
+          type: integer
+          default: 9600
+        commands:
+          type: object
+          properties:
+            F:
+              type: string
+              description: Carro Adelante (Forward) - Motor A
+            B:
+              type: string
+              description: Carro Atrás (Backward) - Motor A
+            L:
+              type: string
+              description: Giro Izquierda (Left) - Motor Paso a Paso
+            R:
+              type: string
+              description: Giro Derecha (Right) - Motor Paso a Paso
+            U:
+              type: string
+              description: Elevación Subir (Up) - Motor B
+            D:
+              type: string
+              description: Elevación Bajar (Down) - Motor B
+            S:
+              type: string
+              description: Parada de Emergencia (Stop) - Detiene todos los motores
