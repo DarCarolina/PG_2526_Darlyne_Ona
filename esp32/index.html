@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -33,7 +34,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             /* Fondo de construcción con overlay */
-            background-image: 
+            background-image:
                 linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.9)),
                 url('assets/bg.png');
             background-size: cover;
@@ -44,7 +45,7 @@
         .header {
             width: 100%;
             padding: 1.5rem;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             border-bottom: 2px solid var(--yellow);
             display: flex;
             justify-content: space-between;
@@ -66,7 +67,7 @@
         }
 
         .settings-btn {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--gray-light);
             color: var(--text);
             padding: 8px 15px;
@@ -99,7 +100,7 @@
             border: 2px solid var(--gray-light);
             overflow: hidden;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
         .visualizer-img {
@@ -112,8 +113,11 @@
 
         .visualizer-overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
@@ -139,7 +143,10 @@
         .visualizer::after {
             content: "";
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
             background-size: 100% 4px, 3px 100%;
             pointer-events: none;
@@ -197,7 +204,7 @@
             border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
             z-index: 20;
             position: relative;
         }
@@ -234,13 +241,14 @@
             justify-content: center;
             gap: 5px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #000, 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 0 #000, 0 10px 20px rgba(0, 0, 0, 0.5);
             user-select: none;
             touch-action: manipulation;
             transition: transform 0.05s;
         }
 
-        .btn:active, .btn.pressed {
+        .btn:active,
+        .btn.pressed {
             transform: translateY(4px);
             box-shadow: 0 2px 0 #000;
             background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
@@ -250,10 +258,11 @@
             background: linear-gradient(145deg, var(--yellow), #ccaa00);
             color: #000;
             border-color: #aa8800;
-            box-shadow: 0 6px 0 #886600, 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 0 #886600, 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .btn.primary:active, .btn.primary.pressed {
+        .btn.primary:active,
+        .btn.primary.pressed {
             box-shadow: 0 2px 0 #886600;
         }
 
@@ -295,19 +304,79 @@
         .footer-stripes {
             height: 15px;
             width: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                var(--yellow),
-                var(--yellow) 20px,
-                #000 20px,
-                #000 40px
-            );
+            background: repeating-linear-gradient(45deg,
+                    var(--yellow),
+                    var(--yellow) 20px,
+                    #000 20px,
+                    #000 40px);
             margin-top: auto;
             border-top: 2px solid #000;
             opacity: 0.8;
         }
+
+        /* Telemetry Panel Styles */
+        .telemetry-panel {
+            background: rgba(30, 30, 30, 0.85);
+            border: 1px solid var(--yellow);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 32px 0 rgba(255, 204, 0, 0.15);
+        }
+
+        .telemetry-title {
+            font-size: 0.75rem;
+            color: var(--yellow);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .telemetry-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .telemetry-item:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        .telemetry-val {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: monospace;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+        }
+
+        .telemetry-label {
+            font-size: 0.55rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
+
 <body>
 
     <header class="header">
@@ -316,7 +385,7 @@
     </header>
 
     <div class="container">
-        
+
         <div id="ip-config">
             <div class="status-label">IP del Dispositivo (ESP32)</div>
             <input type="text" id="esp-ip" value="192.168.4.1" placeholder="Ej: 192.168.1.50">
@@ -340,53 +409,95 @@
             <div id="status-indicator" class="status-indicator"></div>
         </div>
 
+        <!-- Panel de Telemetría Premium -->
+        <div class="telemetry-panel">
+            <div class="telemetry-title">
+                <span>⚙️ TELEMETRÍA DE GRÚA</span>
+                <span id="telem-status" style="font-size: 0.6rem; color: #888; font-weight: bold;">SIN ENLACE</span>
+            </div>
+            <div class="telemetry-grid">
+                <!-- Joysticks -->
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-x">512</div>
+                    <div class="telemetry-label">Joystick X</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-y">512</div>
+                    <div class="telemetry-label">Joystick Y</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-g">512</div>
+                    <div class="telemetry-label">Joystick G</div>
+                </div>
+                <!-- Motores -->
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-a">0% [STOP]</div>
+                    <div class="telemetry-label">Carro (A)</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-b">0% [STOP]</div>
+                    <div class="telemetry-label">Elevación (B)</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-g">0% [STOP]</div>
+                    <div class="telemetry-label">Giro (Paso)</div>
+                </div>
+            </div>
+        </div>
+
         <div class="control-grid">
             <!-- Fila 1 -->
             <div></div>
-            <button class="btn secondary" 
-                onmousedown="startCommand('U', this)" onmouseup="stopCommand()"
+            <button class="btn secondary" onmousedown="startCommand('U', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('U', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 14l5-5 5 5H7z" />
+                </svg>
                 <span class="label">SUBIR</span>
             </button>
             <div></div>
 
             <!-- Fila 2 -->
-            <button class="btn primary" 
-                onmousedown="startCommand('L', this)" onmouseup="stopCommand()"
+            <button class="btn primary" onmousedown="startCommand('L', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('L', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
+                </svg>
                 <span class="label">GIRO IZQ</span>
             </button>
-            <button class="btn primary" 
-                onmousedown="startCommand('F', this)" onmouseup="stopCommand()"
+            <button class="btn primary" onmousedown="startCommand('F', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('F', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M12 8l-6 6h12l-6-6z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 8l-6 6h12l-6-6z" />
+                </svg>
                 <span class="label">CARRO AV</span>
             </button>
-            <button class="btn primary" 
-                onmousedown="startCommand('R', this)" onmouseup="stopCommand()"
+            <button class="btn primary" onmousedown="startCommand('R', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('R', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                </svg>
                 <span class="label">GIRO DER</span>
             </button>
 
             <!-- Fila 3 -->
             <div></div>
-            <button class="btn primary" 
-                onmousedown="startCommand('B', this)" onmouseup="stopCommand()"
+            <button class="btn primary" onmousedown="startCommand('B', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('B', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M12 16l6-6H6l6 6z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 16l6-6H6l6 6z" />
+                </svg>
                 <span class="label">CARRO RE</span>
             </button>
             <div></div>
 
             <!-- Fila 4 -->
             <div></div>
-            <button class="btn secondary" 
-                onmousedown="startCommand('D', this)" onmouseup="stopCommand()"
+            <button class="btn secondary" onmousedown="startCommand('D', this)" onmouseup="stopCommand()"
                 ontouchstart="startCommand('D', this)" ontouchend="stopCommand()">
-                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" />
+                </svg>
                 <span class="label">BAJAR</span>
             </button>
             <div></div>
@@ -465,7 +576,7 @@
         function sendFetch(cmd) {
             const ip = ipInput.value.trim();
             const url = `http://${ip}/control?cmd=${cmd}`;
-            
+
             fetch(url, { mode: 'no-cors' })
                 .then(() => {
                     // Si la petición sale, marcamos como online
@@ -485,14 +596,14 @@
          */
         function startCommand(cmd, btn) {
             if (commandInterval) return; // Evitamos duplicar el intervalo si ya hay uno
-            
+
             currentCommand = cmd;
             updateVisuals(cmd); // Actualizamos la "cámara"
             statusText.innerText = "EJECUTANDO: " + LABELS[cmd];
-            
+
             // Enviamos el comando inmediatamente
             sendFetch(cmd);
-            
+
             // Iniciamos el "heartbeat": enviamos el comando cada 300ms.
             // Esto es CRUCIAL porque el Arduino detiene los motores si no recibe nada en 1s.
             commandInterval = setInterval(() => sendFetch(cmd), 300);
@@ -509,15 +620,15 @@
                 clearInterval(commandInterval); // Detenemos el envío repetitivo
                 commandInterval = null;
             }
-            
+
             // Enviamos comando de parada 'S' (Stop) al Arduino
             sendFetch('S');
-            
+
             // Volvemos al estado de espera
             updateVisuals('IDLE');
             statusText.innerText = "LISTO PARA OPERAR";
             currentCommand = null;
-            
+
             // Limpiamos estilos de presión en todos los botones
             document.querySelectorAll('.btn').forEach(b => b.classList.remove('pressed'));
         }
@@ -533,10 +644,67 @@
             statusIndicator.className = "status-indicator";
         }
 
+        // --- Función de Telemetría en Tiempo Real ---
+        function pollTelemetry() {
+            const ip = ipInput.value.trim();
+            const url = `http://${ip}/telemetria`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en respuesta");
+                    return response.json();
+                })
+                .then(data => {
+                    // Si recibimos datos válidos, actualizamos el panel
+                    const statusTextElem = document.getElementById('telem-status');
+                    statusTextElem.innerText = "CONECTADO";
+                    statusTextElem.style.color = "var(--success)";
+
+                    // Actualizar Joysticks
+                    document.getElementById('telem-joy-x').innerText = data.jx;
+                    document.getElementById('telem-joy-y').innerText = data.jy;
+                    document.getElementById('telem-joy-g').innerText = data.jg;
+
+                    // Actualizar Motores
+                    // Carro (Motor A): speed (0-255)
+                    const speedA = Math.round((data.sa / 255) * 100);
+                    const dirA = data.da === 'F' ? 'AV' : (data.da === 'B' ? 'RE' : 'STOP');
+                    const motAElem = document.getElementById('telem-mot-a');
+                    motAElem.innerText = `${speedA}% [${dirA}]`;
+                    motAElem.style.color = data.da !== 'S' ? 'var(--yellow)' : '#fff';
+
+                    // Elevación (Motor B): speed (0-255)
+                    const speedB = Math.round((data.sb / 255) * 100);
+                    const dirB = data.db === 'U' ? 'SUB' : (data.db === 'D' ? 'BAJ' : 'STOP');
+                    const motBElem = document.getElementById('telem-mot-b');
+                    motBElem.innerText = `${speedB}% [${dirB}]`;
+                    motBElem.style.color = data.db !== 'S' ? 'var(--yellow)' : '#fff';
+
+                    // Giro (Motor a pasos): speed (pasos/seg)
+                    const speedG = Math.round((data.sg / 600) * 100);
+                    const dirG = data.dg === 'R' ? 'DER' : (data.dg === 'L' ? 'IZQ' : 'STOP');
+                    const motGElem = document.getElementById('telem-mot-g');
+                    motGElem.innerText = `${speedG}% [${dirG}]`;
+                    motGElem.style.color = data.dg !== 'S' ? 'var(--yellow)' : '#fff';
+
+                    // Si la grúa torre tiene comunicación activa con el Arduino, actualizamos el estado de conexión general
+                    if (data.active) {
+                        statusIndicator.className = "status-indicator online";
+                    }
+                })
+                .catch(err => {
+                    const statusTextElem = document.getElementById('telem-status');
+                    statusTextElem.innerText = "SIN ENLACE";
+                    statusTextElem.style.color = "var(--danger)";
+                });
+        }
+
+        // Iniciar el polling de telemetría cada 400ms
+        setInterval(pollTelemetry, 400);
+
         // Bloqueamos el menú contextual (clic derecho) para una mejor experiencia táctil
         window.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
     </script>
 </body>
+
 </html>
-
-

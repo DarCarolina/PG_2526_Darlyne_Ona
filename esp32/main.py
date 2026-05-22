@@ -4,6 +4,47 @@
 import uasyncio as asyncio
 from machine import UART, Pin
 import socket
+import ujson
+
+# --- Lógica de Telemetría ---
+# Estructura global de datos de telemetría de la grúa torre
+telemetry_data = {
+    "jx": 512,  # Joystick X (Carro)
+    "jy": 512,  # Joystick Y (Elevación)
+    "jg": 512,  # Joystick Giro
+    "sa": 0,    # Velocidad real Motor A (Carro)
+    "da": "S",  # Dirección real Motor A
+    "sb": 0,    # Velocidad real Motor B (Elevación)
+    "db": "S",  # Dirección real Motor B
+    "sg": 0,    # Velocidad real Motor Giro
+    "dg": "S",  # Dirección real Motor Giro
+    "active": False
+}
+
+async def read_uart_telemetry():
+    """Tarea asíncrona para leer tramas seriales JSON desde el Arduino Nano."""
+    global telemetry_data
+    buffer = b""
+    while True:
+        try:
+            if uart.any():
+                data = uart.read()
+                if data:
+                    buffer += data
+                    while b"\n" in buffer:
+                        line_bytes, buffer = buffer.split(b"\n", 1)
+                        line = line_bytes.decode('utf-8').strip()
+                        if line.startswith("{") and line.endswith("}"):
+                            try:
+                                new_data = ujson.loads(line)
+                                telemetry_data.update(new_data)
+                                telemetry_data["active"] = True
+                            except Exception:
+                                pass
+        except Exception as e:
+            print("Error en lectura UART:", e)
+        await asyncio.sleep_ms(50)
+
 
 # --- Configuración UART ---
 # Usamos el puerto UART 2 del ESP32.
@@ -61,6 +102,12 @@ async def handle_client(reader, writer):
         writer.write('HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n')
         writer.write(response)
     
+    # RUTA: /telemetria
+    elif "GET /telemetria" in request:
+        response = ujson.dumps(telemetry_data)
+        writer.write('HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n')
+        writer.write(response)
+        
     # RUTA: / o /index.html
     # Sirve la interfaz web principal desde la memoria del ESP32.
     elif "GET / " in request or "GET /index.html" in request:
@@ -84,6 +131,10 @@ async def handle_client(reader, writer):
 async def main():
     """Función principal para iniciar el servidor."""
     print("Iniciando servidor web asíncrono en puerto 80...")
+    
+    # Iniciamos la tarea de telemetría en segundo plano
+    asyncio.create_task(read_uart_telemetry())
+    
     # Escuchamos en todas las interfaces (0.0.0.0)
     server = await asyncio.start_server(handle_client, "0.0.0.0", 80)
     
@@ -91,10 +142,11 @@ async def main():
     while True:
         await asyncio.sleep(1)
 
-# Punto de entrada de la aplicación
+# Ejecutar el servidor al final de main.py de manera segura
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
-    print("Servidor detenido por el usuario.")
+    print("\nServidor web detenido desde el teclado.")
 except Exception as e:
-    print("Error fatal:", e)
+    print("\nError fatal:", e)
+

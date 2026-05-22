@@ -47,6 +47,21 @@ char lastSerialCmd = 'S';       // Almacena el último comando recibido vía Ser
 unsigned long lastCmdTime = 0;   // Registra el tiempo del último comando recibido para el timeout
 const unsigned long CMD_TIMEOUT = 1000; // Tiempo de seguridad (1 segundo). Si no llega nada, se detiene.
 
+// Variables para Telemetría
+int telemetryJoyX = 512;
+int telemetryJoyY = 512;
+int telemetryJoyG = 512;
+int telemetrySpeedCarro = 0;
+char telemetryDirCarro = 'S';
+int telemetrySpeedElev = 0;
+char telemetryDirElev = 'S';
+int telemetrySpeedGiro = 0;
+char telemetryDirGiro = 'S';
+
+unsigned long lastTelemetryTime = 0;
+const unsigned long TELEMETRY_INTERVAL = 250; // Enviar cada 250ms
+
+
 void setup() {
   // Configuración de pines de salida para el driver TB6612FNG
   pinMode(AIN1, OUTPUT);
@@ -94,6 +109,32 @@ void loop() {
 
   // Ejecutamos el movimiento del motor a pasos (necesario para que AccelStepper funcione)
   stepperGiro.runSpeed();
+
+  // 4. ENVÍO DE TELEMETRÍA (Hacia el ESP32)
+  if (millis() - lastTelemetryTime >= TELEMETRY_INTERVAL) {
+    lastTelemetryTime = millis();
+    
+    // Enviamos un JSON simple por el puerto Serial
+    Serial.print("{\"jx\":");
+    Serial.print(telemetryJoyX);
+    Serial.print(",\"jy\":");
+    Serial.print(telemetryJoyY);
+    Serial.print(",\"jg\":");
+    Serial.print(telemetryJoyG);
+    Serial.print(",\"sa\":");
+    Serial.print(telemetrySpeedCarro);
+    Serial.print(",\"da\":\"");
+    Serial.print(telemetryDirCarro);
+    Serial.print("\",\"sb\":");
+    Serial.print(telemetrySpeedElev);
+    Serial.print(",\"db\":\"");
+    Serial.print(telemetryDirElev);
+    Serial.print("\",\"sg\":");
+    Serial.print(telemetrySpeedGiro);
+    Serial.print(",\"dg\":\"");
+    Serial.print(telemetryDirGiro);
+    Serial.println("\"}");
+  }
 }
 
 /**
@@ -103,36 +144,47 @@ void loop() {
  */
 void controlCarro(int joy, char cmd) {
   int speed = 0;
+  char dir = 'S';
   
   // --- LÓGICA MANUAL (JOYSTICK) ---
   if (joy > 570) { // Mover adelante
     speed = map(joy, 570, 1023, 0, 255);
+    dir = 'F';
     digitalWrite(AIN1, HIGH);
     digitalWrite(AIN2, LOW);
   } else if (joy < 450) { // Mover atrás
     speed = map(joy, 450, 0, 0, 255);
+    dir = 'B';
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, HIGH);
   } 
   // --- LÓGICA REMOTA (WEB via ESP32) ---
   else if (cmd == 'F') { // Comando Adelante
     speed = 200;
+    dir = 'F';
     digitalWrite(AIN1, HIGH);
     digitalWrite(AIN2, LOW);
   } else if (cmd == 'B') { // Comando Atrás
     speed = 200;
+    dir = 'B';
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, HIGH);
   } 
   // --- PARADA ---
   else {
     speed = 0;
+    dir = 'S';
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, LOW);
   }
   
   // Aplicamos la velocidad mediante PWM
   analogWrite(PWMA, speed);
+
+  // Guardamos telemetría
+  telemetryJoyX = joy;
+  telemetrySpeedCarro = speed;
+  telemetryDirCarro = dir;
 }
 
 /**
@@ -142,36 +194,47 @@ void controlCarro(int joy, char cmd) {
  */
 void controlElevacion(int joy, char cmd) {
   int speed = 0;
+  char dir = 'S';
   
   // --- LÓGICA MANUAL ---
   if (joy > 570) { // Subir
     speed = map(joy, 570, 1023, 0, 255);
+    dir = 'U';
     digitalWrite(BIN1, HIGH);
     digitalWrite(BIN2, LOW);
   } else if (joy < 450) { // Bajar
     speed = map(joy, 450, 0, 0, 255);
+    dir = 'D';
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
   } 
   // --- LÓGICA REMOTA ---
   else if (cmd == 'U') { // Comando Subir
     speed = 200;
+    dir = 'U';
     digitalWrite(BIN1, HIGH);
     digitalWrite(BIN2, LOW);
   } else if (cmd == 'D') { // Comando Bajar
     speed = 200;
+    dir = 'D';
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
   } 
   // --- PARADA ---
   else {
     speed = 0;
+    dir = 'S';
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, LOW);
   }
   
   // Aplicamos la velocidad mediante PWM
   analogWrite(PWMB, speed);
+
+  // Guardamos telemetría
+  telemetryJoyY = joy;
+  telemetrySpeedElev = speed;
+  telemetryDirElev = dir;
 }
 
 /**
@@ -181,21 +244,38 @@ void controlElevacion(int joy, char cmd) {
  */
 void controlGiro(int joy, char cmd) {
   // El motor a pasos requiere que definamos la velocidad en pasos por segundo
+  int speed = 0;
+  char dir = 'S';
   
   // --- LÓGICA MANUAL ---
   if (joy > 570) {
+    speed = 400;
+    dir = 'R';
     stepperGiro.setSpeed(400); // Giro derecha manual
   } else if (joy < 450) {
+    speed = 400;
+    dir = 'L';
     stepperGiro.setSpeed(-400); // Giro izquierda manual
   } 
   // --- LÓGICA REMOTA ---
   else if (cmd == 'L') {
+    speed = 600;
+    dir = 'L';
     stepperGiro.setSpeed(-600); // Giro izquierda remoto (más rápido)
   } else if (cmd == 'R') {
+    speed = 600;
+    dir = 'R';
     stepperGiro.setSpeed(600);  // Giro derecha remoto
   } 
   // --- PARADA ---
   else {
+    speed = 0;
+    dir = 'S';
     stepperGiro.setSpeed(0);
   }
+
+  // Guardamos telemetría
+  telemetryJoyG = joy;
+  telemetrySpeedGiro = speed;
+  telemetryDirGiro = dir;
 }

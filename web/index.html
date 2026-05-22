@@ -306,6 +306,67 @@
             border-top: 2px solid #000;
             opacity: 0.8;
         }
+
+        /* Telemetry Panel Styles */
+        .telemetry-panel {
+            background: rgba(30, 30, 30, 0.85);
+            border: 1px solid var(--yellow);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 32px 0 rgba(255, 204, 0, 0.15);
+        }
+
+        .telemetry-title {
+            font-size: 0.75rem;
+            color: var(--yellow);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .telemetry-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .telemetry-item:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        .telemetry-val {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: monospace;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+        }
+
+        .telemetry-label {
+            font-size: 0.55rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -338,6 +399,42 @@
                 <span id="status-text" class="status-value">LISTO PARA OPERAR</span>
             </div>
             <div id="status-indicator" class="status-indicator"></div>
+        </div>
+
+        <!-- Panel de Telemetría Premium -->
+        <div class="telemetry-panel">
+            <div class="telemetry-title">
+                <span>⚙️ TELEMETRÍA DE GRÚA</span>
+                <span id="telem-status" style="font-size: 0.6rem; color: #888; font-weight: bold;">SIN ENLACE</span>
+            </div>
+            <div class="telemetry-grid">
+                <!-- Joysticks -->
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-x">512</div>
+                    <div class="telemetry-label">Joystick X</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-y">512</div>
+                    <div class="telemetry-label">Joystick Y</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-joy-g">512</div>
+                    <div class="telemetry-label">Joystick G</div>
+                </div>
+                <!-- Motores -->
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-a">0% [STOP]</div>
+                    <div class="telemetry-label">Carro (A)</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-b">0% [STOP]</div>
+                    <div class="telemetry-label">Elevación (B)</div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-val" id="telem-mot-g">0% [STOP]</div>
+                    <div class="telemetry-label">Giro (Paso)</div>
+                </div>
+            </div>
         </div>
 
         <div class="control-grid">
@@ -533,10 +630,66 @@
             statusIndicator.className = "status-indicator";
         }
 
+        // --- Función de Telemetría en Tiempo Real ---
+        function pollTelemetry() {
+            const ip = ipInput.value.trim();
+            const url = `http://${ip}/telemetria`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en respuesta");
+                    return response.json();
+                })
+                .then(data => {
+                    // Si recibimos datos válidos, actualizamos el panel
+                    const statusTextElem = document.getElementById('telem-status');
+                    statusTextElem.innerText = "CONECTADO";
+                    statusTextElem.style.color = "var(--success)";
+
+                    // Actualizar Joysticks
+                    document.getElementById('telem-joy-x').innerText = data.jx;
+                    document.getElementById('telem-joy-y').innerText = data.jy;
+                    document.getElementById('telem-joy-g').innerText = data.jg;
+
+                    // Actualizar Motores
+                    // Carro (Motor A): speed (0-255)
+                    const speedA = Math.round((data.sa / 255) * 100);
+                    const dirA = data.da === 'F' ? 'AV' : (data.da === 'B' ? 'RE' : 'STOP');
+                    const motAElem = document.getElementById('telem-mot-a');
+                    motAElem.innerText = `${speedA}% [${dirA}]`;
+                    motAElem.style.color = data.da !== 'S' ? 'var(--yellow)' : '#fff';
+
+                    // Elevación (Motor B): speed (0-255)
+                    const speedB = Math.round((data.sb / 255) * 100);
+                    const dirB = data.db === 'U' ? 'SUB' : (data.db === 'D' ? 'BAJ' : 'STOP');
+                    const motBElem = document.getElementById('telem-mot-b');
+                    motBElem.innerText = `${speedB}% [${dirB}]`;
+                    motBElem.style.color = data.db !== 'S' ? 'var(--yellow)' : '#fff';
+
+                    // Giro (Motor a pasos): speed (pasos/seg)
+                    const speedG = Math.round((data.sg / 600) * 100);
+                    const dirG = data.dg === 'R' ? 'DER' : (data.dg === 'L' ? 'IZQ' : 'STOP');
+                    const motGElem = document.getElementById('telem-mot-g');
+                    motGElem.innerText = `${speedG}% [${dirG}]`;
+                    motGElem.style.color = data.dg !== 'S' ? 'var(--yellow)' : '#fff';
+                    
+                    // Si la grúa torre tiene comunicación activa con el Arduino, actualizamos el estado de conexión general
+                    if (data.active) {
+                        statusIndicator.className = "status-indicator online";
+                    }
+                })
+                .catch(err => {
+                    const statusTextElem = document.getElementById('telem-status');
+                    statusTextElem.innerText = "SIN ENLACE";
+                    statusTextElem.style.color = "var(--danger)";
+                });
+        }
+
+        // Iniciar el polling de telemetría cada 400ms
+        setInterval(pollTelemetry, 400);
+
         // Bloqueamos el menú contextual (clic derecho) para una mejor experiencia táctil
         window.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
     </script>
 </body>
 </html>
-
-

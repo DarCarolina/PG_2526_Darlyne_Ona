@@ -6,9 +6,9 @@ Este documento está optimizado para su procesamiento por agentes de IA en **Ant
 ---
 
 ## 1. Arquitectura de Hardware y Pines
-### Controlador A: Arduino Nano (Actuador Principal)
+### Controlador A: Arduino Nano (Actuador Principal y Emisor de Telemetría)
 - **Framework:** Arduino / C++
-- **Responsabilidad:** Controlar motores y leer entradas analógicas. Escuchar comandos Serial desde ESP32.
+- **Responsabilidad:** Controlar motores, leer entradas analógicas, escuchar comandos seriales desde ESP32 y transmitir telemetría de vuelta.
 - **Asignación de Pines:**
   - **Joysticks:** X (Carro) -> A0, Y (Elevación) -> A1, Giro -> A2.
   - **Driver TB6612FNG (Motores DC N20):** 
@@ -17,13 +17,14 @@ Este documento está optimizado para su procesamiento por agentes de IA en **Ant
     - STBY -> VCC (5V).
   - **Driver DRV8825 (Motor a Pasos Nema 17):** 
     - STEP -> D9, DIR -> D10.
-  - **Comunicación:** RX(D0) desde el TX del ESP32.
+  - **Comunicación:** RX(D0) desde el TX del ESP32, y TX(D1) al RX (GPIO 16) del ESP32 para envío de telemetría.
 
-### Controlador B: ESP32 DevKit V1 (Interfaz Web)
+### Controlador B: ESP32 DevKit V1 (Interfaz Web y Central de Telemetría)
 - **Framework:** MicroPython (Thonny IDE)
-- **Responsabilidad:** Levantar un servidor web asíncrono, gestionar conexión WiFi y enviar comandos UART.
+- **Responsabilidad:** Levantar un servidor web asíncrono, gestionar conexión WiFi, transmitir comandos UART y recopilar/servir telemetría serial.
 - **Asignación de Pines:**
   - **UART TX:** GPIO 17 (Conectado a RX del Nano).
+  - **UART RX:** GPIO 16 (Conectado a TX del Nano para recepción de datos de telemetría).
   - **LED Status:** GPIO 2.
 
 ---
@@ -35,17 +36,21 @@ Este documento está optimizado para su procesamiento por agentes de IA en **Ant
 - **Protocolo Serial:** Implementar un parser simple para comandos UART (Ej: 'F'=Adelante, 'B'=Atrás, 'U'=Subir, 'D'=Bajar, 'L'=Giro Izq, 'R'=Giro Der, 'S'=Stop).
 - **Control de Velocidad:** Utilizar PWM para los motores N20.
 - **Control Stepper:** Implementar movimiento suave para el Nema 17 usando la librería `AccelStepper` o lógica de retardos no bloqueante.
+- **Transmisión de Telemetría:** Implementar envío periódico no bloqueante (cada 250ms usando `millis()`) de tramas seriales JSON conteniendo lecturas de joysticks (`jx`, `jy`, `jg`), velocidad (`sa`, `sb`, `sg`) y dirección (`da`, `db`, `dg`) de los motores.
 
 ### Tarea 2: Firmware ESP32 (boot.py y main.py)
-- **Conexión WiFi:** Implementar función robusta de conexión a SSID/Password.
+- **Menú de Inicio (boot.py):** Integrar un menú interactivo por consola serial con timeout de 5s para iniciar normalmente o ejecutar `sys.exit()` para liberar el REPL de MicroPython.
+- **Conexión WiFi:** Implementar función de conexión WiFi robusta.
 - **Servidor Web:**
-  - Endpoint `/` que entregue un HTML con botones (Adelante, Atrás, Izquierda, Derecha, Subir, Bajar, Parar).
-  - Uso de JavaScript (Fetch API) en el cliente para enviar peticiones al servidor sin recargar la página.
-- **Transmisión UART:** Al recibir una petición web, enviar el carácter correspondiente por el puerto serial a 9600 baudios.
+  - Endpoint `/` o `/index.html` que entregue la interfaz web.
+  - Endpoint `/telemetria` que devuelva el último estado JSON guardado.
+- **Lector UART de Telemetría (main.py):** Iniciar una corrutina asíncrona en segundo plano que reciba y parsee los paquetes seriales JSON desde el Arduino.
+- **Transmisión UART:** Al recibir peticiones `/control?cmd=[X]`, enviar el comando correspondiente por UART a 9600 baudios.
 
-### Tarea 3: Interfaz Web (HTML/CSS)
-- Diseño minimalista tipo "Control Remoto".
-- Botones grandes y responsivos para uso en móvil.
+### Tarea 3: Interfaz Web (HTML/CSS/JS)
+- Diseño responsivo tipo "Control Remoto" con estética glassmorphic premium e industrial.
+- Botones táctiles grandes aptos para dispositivos móviles.
+- **Dashboard de Telemetría:** Un panel visualizado que realice polling periódico (cada 400ms) a `/telemetria` para actualizar lecturas analógicas de Joysticks y velocidades direccionales en tiempo real.
 
 ---
 
